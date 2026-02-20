@@ -24,5 +24,5 @@ exports.newOrder = async (event) => {
     body: JSON.stringify({
         message: order
     }),
-}
+};
 }   

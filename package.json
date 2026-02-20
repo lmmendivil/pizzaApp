@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/lmmendivil/pizzaApp/issues"
   },
-  "homepage": "https://github.com/lmmendivil/pizzaApp#readme"
+  "homepage": "https://github.com/lmmendivil/pizzaApp#readme",
+  "dependencies": {
+    "uuid": "^11.1.0"
+  }
 }
