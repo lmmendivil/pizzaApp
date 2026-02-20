@@ -1,10 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
 
-
-
-
-
-
 exports.newOrder = async (event) => {
     
    const orderId = uuidv4();
