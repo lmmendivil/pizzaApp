@@ -22,6 +22,9 @@ provider:
 functions:
   newOrder:
     handler: handler.newOrder  
+    environment:
+      PENDING_ORDER_QUEUE_URL:
+        Ref: PendingOrderQueue
     events:
       - httpApi:
           path: /order
