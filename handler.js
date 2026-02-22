@@ -27,7 +27,7 @@ exports.newOrder = async (event) => {
 };
 }   
 
-exports.getOtder = async (event) => {
+exports.getOrder = async (event) => {
     console.log(event);
 
     const orderId = event.pathParameters.orderId
