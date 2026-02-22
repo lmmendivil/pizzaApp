@@ -33,9 +33,9 @@ exports.getOtder = async (event) => {
     const orderId = event.pathParameters.orderId
 
     const orderDetails = {
-        "Pizza": "Margarita"
-        "CustomerId": "Abc123"
-        "Order_status" : "Completed"
+        "pizza": "Margarita",
+        "customerId": 1,
+        "order_status": "COMPLETED"
     };
 
     const order = {orderId,...orderDetails}
