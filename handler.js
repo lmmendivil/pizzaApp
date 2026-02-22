@@ -30,5 +30,20 @@ exports.newOrder = async (event) => {
 exports.getOtder = async (event) => {
     console.log(event);
 
-    const orderId= event.pathParameters.orderId
+    const orderId = event.pathParameters.orderId
+
+    const orderDetails = {
+        "Pizza": "Margarita"
+        "CustomerId": "Abc123"
+        "Order_status" : "Completed"
+    };
+
+    const order = {orderId,...orderDetails}
+
+    console.log(order);
+    
+    return {
+        statusCode: 200,
+        body: JSON.stringify({message: order})
+    };
 }
