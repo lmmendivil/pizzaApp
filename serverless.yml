@@ -26,3 +26,9 @@ functions:
           path: /order/{orderId}
           method: get
   
+resources: 
+  Resources:
+    PendingOrderQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: pendingOrderQueue

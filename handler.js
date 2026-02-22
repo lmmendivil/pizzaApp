@@ -47,3 +47,14 @@ exports.getOrder = async (event) => {
         body: JSON.stringify({message: order})
     };
 }
+
+exports.prepOrder = async(event) => {
+    console.log(event);
+    
+
+    
+    return {
+        statusCode: 200,
+        body: JSON.stringify({message: "Order in preparation"})
+    };
+}
