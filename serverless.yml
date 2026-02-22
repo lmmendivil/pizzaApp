@@ -10,6 +10,14 @@ provider:
   region: us-east-1
   environment:
     REGION: ${self:provider.region}
+  iam:
+      role:
+       statements:
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource: 
+            Fn::GetAtt: [PendingOrderQueue, Arn]
 
 
 functions:
@@ -25,6 +33,13 @@ functions:
       - httpApi:
           path: /order/{orderId}
           method: get
+  prepOrder: 
+    handler: handler.prepOrder
+    events:
+      - sqs:
+          arn: 
+            Fn::GetAtt: [PendingOrderQueue, Arn]
+          batchSize: 1        
   
 resources: 
   Resources:
