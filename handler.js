@@ -17,7 +17,7 @@ exports.newOrder = async (event) => {
    }
    console.log(orderDetails)
 
-   const order = {order, ...orderDetails}
+   const order = {orderId, ...orderDetails}
 
    return {
     statusCode: 200,
