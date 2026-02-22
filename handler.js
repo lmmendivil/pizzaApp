@@ -26,3 +26,9 @@ exports.newOrder = async (event) => {
     }),
 };
 }   
+
+exports.getOtder = async (event) => {
+    console.log(event);
+
+    const orderId= event.pathParameters.orderId
+}
