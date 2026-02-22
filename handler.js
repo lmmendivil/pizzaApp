@@ -25,4 +25,4 @@ exports.newOrder = async (event) => {
         message: order
     }),
 };
-}   Testing
+}   
