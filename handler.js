@@ -77,7 +77,9 @@ exports.prepOrder = async(event) => {
     const body = JSON.parse(event.Records[0].body);
     const orderId = body.orderId;
 
-    
+    await updateStatusinOrder(orderId, "Preparing");
+
+    return;
 }
 
 exports.sendOrder = async(event) => {
@@ -142,7 +144,7 @@ async function updateStatusinOrder(orderId, status) {
     const params = {
       TableName: process.env.ORDERS_TABLE,
       Key: { orderId },
-      UpdateExpression: "set order_status = :c",
+      UpdateExpression: "SET order_status = :c",
       ExpressionAttributeValues: {
         ":c": status
       },

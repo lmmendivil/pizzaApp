@@ -26,14 +26,16 @@ provider:
         - Effect: Allow
           Action: 
             - dynamodb:PutItem
+            - dynamodb:UpdateItem
           Resource: 
             Fn::GetAtt: [OrdersTable, Arn]
+            
 
 functions:
   newOrder:
     handler: handler.newOrder  
     environment:
-      PENDING_ORDER_QUEUE_URL:
+      PENDING_ORDERS_QUEUE_URL:
         Ref: PendingOrderQueue
       ORDERS_TABLE:
         Ref: OrdersTable
@@ -49,6 +51,9 @@ functions:
           method: get
   prepOrder: 
     handler: handler.prepOrder
+    environment:
+      ORDERS_TABLE:
+        Ref: OrdersTable
     events:
       - sqs:
           arn: 
