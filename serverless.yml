@@ -11,8 +11,8 @@ provider:
   environment:
     REGION: ${self:provider.region}
   iam:
-      role:
-       statements:
+    role:
+      statements:
         - Effect: Allow
           Action:
             - sqs:SendMessage
