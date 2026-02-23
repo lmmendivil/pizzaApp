@@ -22,7 +22,9 @@ exports.newOrder = async (event) => {
 
    const order = {orderId, ...orderDetails}
 
-   await sendMessageToSqs(order)
+   const ORDERS_TO_PENDING_ORDER_QUEUE_URL = process.env.PENDING_ORDER_QUEUE_URL
+
+   await sendMessageToSqs(order, PENDING_ORDER_QUEUE_URL)
 
 
    return {
@@ -65,14 +67,29 @@ exports.prepOrder = async(event) => {
     };
 }
 
+exports.sendOrder = async(event) => {
+    console.log(event);
+
+    const order = {
+        orderId: event.orderId,
+        pizza: event.pizza,
+        customerId: event.customerId
+    }
+
+    const ORDERS_TO_SEND_QUEUE = process.env.ORDERS_TO_SEND_QUEUE
+
+    await sendMessageToSqs(order, ORDERS_TO_SEND_QUEUE)
+
+    return; 
+    }
 
 
-async function sendMessageToSqs(message) {
+
+async function sendMessageToSqs(message, queueURL) {
   
-  const sqsClient = new SQSClient({ region: process.env.REGION });
-
+  
   const params = {
-    QueueUrl: process.env.PENDING_ORDER_QUEUE_URL,
+    QueueUrl: queueURL,
     MessageBody: JSON.stringify(message)
   };
   
