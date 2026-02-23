@@ -34,6 +34,8 @@ exports.newOrder = async (event) => {
 
    const order = {orderId, ...orderDetails}
 
+   await saveItemtoDynamoDB(order)
+
    const ORDERS_TO_PENDING_ORDER_QUEUE_URL = process.env.PENDING_ORDER_QUEUE_URL
 
    await sendMessageToSqs(order, PENDING_ORDER_QUEUE_URL)
