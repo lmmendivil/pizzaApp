@@ -58,3 +58,22 @@ exports.prepOrder = async(event) => {
         body: JSON.stringify({message: "Order in preparation"})
     };
 }
+
+
+
+async function sendMessageToSqs(message)
+
+  const params = {
+    QueueURL: process.env.PENDING_ORDERS_QUEUE,
+    MessageBody: JSON.stringify(message)
+  };
+  
+  try {
+    const command = new sendMessageCommand(params);
+    const data = await sqsClient.send(command);
+    console.log("Message sent to SQS successfully", data.MessageId);
+    return data;
+  } catch (error) {
+    console.error("Error sending message to SQS:", error)
+    throw error;    
+  }
