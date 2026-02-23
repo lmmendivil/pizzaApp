@@ -1,17 +1,18 @@
 const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
-const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand } = require ("@aws-sdk/lib-dynamodb");
+
 
 //sqs client
 const sqsClient = new SQSClient({ region: process.env.REGION });
+
+const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand } = require ("@aws-sdk/lib-dynamodb");
 
 // Create a DynamoDB client
 const client = new DynamoDBClient({ region: process.env.REGION }); 
 
 // Create a DynamoDB document client
 const docClient = DynamoDBDocumentClient.from(client);
-
 
 
 exports.newOrder = async (event) => {
@@ -36,9 +37,9 @@ exports.newOrder = async (event) => {
 
    await saveItemtoDynamoDB(order)
 
-   const PENDING_ORDER_QUEUE_URL = process.env.PENDING_ORDER_QUEUE_URL
+   const PENDING_ORDERS_QUEUE_URL = process.env.PENDING_ORDER_QUEUE_URL
 
-   await sendMessageToSqs(order, PENDING_ORDER_QUEUE_URL)
+   await sendMessageToSqs(order, PENDING_ORDERS_QUEUE_URL)
 
 
    return {
@@ -121,7 +122,7 @@ async function saveItemtoDynamoDB(item){
 
     const params = {
         TableName: process.env.ORDERS_TABLE,
-        item: item
+        Item: item
     };
 
     console.log(params);
