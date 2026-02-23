@@ -74,12 +74,10 @@ exports.getOrder = async (event) => {
 exports.prepOrder = async(event) => {
     console.log(event);
     
+    const body = JSON.parse(event.Records[0].body);
+    const orderId = body.orderId;
 
     
-    return {
-        statusCode: 200,
-        body: JSON.stringify({message: "Order in preparation"})
-    };
 }
 
 exports.sendOrder = async(event) => {
@@ -150,6 +148,7 @@ async function updateStatusinOrder(orderId, status) {
       },
       ReturnValues: "ALL_NEW"  
     };
+
 console.log(params)
 
     try {
