@@ -1,12 +1,12 @@
 const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 
-
 //sqs client
 const sqsClient = new SQSClient({ region: process.env.REGION });
 
+
 const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand } = require ("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand } = require ("@aws-sdk/lib-dynamodb");
 
 // Create a DynamoDB client
 const client = new DynamoDBClient({ region: process.env.REGION }); 
@@ -138,3 +138,28 @@ async function saveItemtoDynamoDB(item){
     }
 
  }
+
+async function updateStatusinOrder(orderId, status) {
+
+    const params = {
+      TableName: process.env.ORDERS_TABLE,
+      Key: { orderId },
+      UpdateExpression: "set order_status = :c",
+      ExpressionAttributeValues: {
+        ":c": status
+      },
+      ReturnValues: "ALL_NEW"  
+    };
+console.log(params)
+
+    try {
+        const command = new UpdateCommand(params);
+        const response = await docClient.send(command);
+        console.log("item updated in dynamodb", response);
+        return response.Attributes; 
+    } catch (err) {
+        console.error("Error updating item in dynamodb", err);
+        throw err;
+    }
+
+}
