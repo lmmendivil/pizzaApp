@@ -18,6 +18,11 @@ provider:
             - sqs:SendMessage
           Resource: 
             Fn::GetAtt: [PendingOrderQueue, Arn]
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource: 
+            Fn::GetAtt: [OrdersToSendQueue, Arn]
 
 functions:
   newOrder:
