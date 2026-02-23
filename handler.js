@@ -15,9 +15,13 @@ exports.newOrder = async (event) => {
         body: JSON.stringify({message: "Invalid JSON format in order details"}),
     };    
    }
+   
    console.log(orderDetails)
 
    const order = {orderId, ...orderDetails}
+
+   await sendMessageToSqs(order)
+
 
    return {
     statusCode: 200,
