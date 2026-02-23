@@ -47,6 +47,12 @@ functions:
           arn: 
             Fn::GetAtt: [PendingOrderQueue, Arn]
           batchSize: 1        
+  sendOrder:
+    handler: handler.sendOrder
+    environment:
+      ORDERS_TO_SEND_QUEUE:
+        Ref: OrdersToSendQueue       
+  
   
 resources: 
   Resources:
