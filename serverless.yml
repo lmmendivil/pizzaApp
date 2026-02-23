@@ -34,7 +34,7 @@ functions:
     handler: handler.newOrder  
     environment:
       PENDING_ORDER_QUEUE_URL:
-        Ref: PendingOrderQueue
+        Fn::GetAtt: [PendingOrderQueue, QueueUrl]
       ORDERS_TABLE:
         Ref: OrdersTable
     events:
