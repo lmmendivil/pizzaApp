@@ -23,6 +23,11 @@ provider:
             - sqs:SendMessage
           Resource: 
             Fn::GetAtt: [OrdersToSendQueue, Arn]
+        - Effect: Allow
+          Action: 
+            - dynamodb:PutItem
+          Resource: 
+            Fn::GetAtt: [OrdersTable, Arn]
 
 functions:
   newOrder:
