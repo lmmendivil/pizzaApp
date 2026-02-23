@@ -35,6 +35,8 @@ functions:
     environment:
       PENDING_ORDER_QUEUE_URL:
         Ref: PendingOrderQueue
+      ORDERS_TABLE:
+        Ref: OrdersTable
     events:
       - httpApi:
           path: /order
