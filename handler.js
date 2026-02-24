@@ -147,3 +147,29 @@ async function saveItemToDynamoDB(item) {
     throw error;
   }
 }
+
+ async function updateStatusInOrder(orderId, status) {
+ 
+     const params = {
+       TableName: process.env.ORDERS_TABLE,
+       Key: { orderId },
+       UpdateExpression: "SET order_status = :c",
+       ExpressionAttributeValues: {
+         ":c": status
+       },
+       ReturnValues: "ALL_NEW"  
+     };
+     
+ console.log(params)
+ 
+     try {
+         const command = new UpdateCommand(params);
+         const response = await docClient.send(command);
+         console.log("item updated in dynamodb", response);
+         return response.Attributes; 
+     } catch (err) {
+         console.error("Error updating item in dynamodb", err);
+         throw err;
+     }
+ 
+ }
