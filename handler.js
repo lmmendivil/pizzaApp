@@ -46,3 +46,9 @@ exports.getOrder = async (event) => {
     body: JSON.stringify({message: order})
   };
 }
+
+exports.prepOrder = async (event) => {
+  console.log(event);
+
+  return;
+};
