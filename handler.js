@@ -1,7 +1,18 @@
 const { v4: uuidv4 } = require('uuid');
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+
+//SQS Client
 const sqsClient = new SQSClient({ region: process.env.REGION });
 
+//DynamoDB
+const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand } = require ("@aws-sdk/lib-dynamodb");
+
+// Create a DynamoDB client
+const client = new DynamoDBClient({ region: process.env.REGION }); 
+
+// Create a DynamoDB document client
+const docClient = DynamoDBDocumentClient.from(client);
 
 exports.newOrder = async (event) => {
 
