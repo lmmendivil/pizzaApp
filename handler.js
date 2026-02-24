@@ -34,6 +34,14 @@ exports.newOrder = async (event) => {
 
   const order = {orderId, ...orderDetails}
 
+  
+
+  //Save item into DynamoDB 
+  
+  await saveItemToDynamoDB(order);
+
+
+
   const ORDERS_TO_SEND_QUEUE_URL = process.env.PENDING_ORDER_QUEUE
 
   await sendMessageToSQS(order, ORDERS_TO_SEND_QUEUE_URL);
@@ -106,10 +114,6 @@ exports.sendOrder = async (event) => {
   return;
 }
 
-
-
-
->>>>>>> dynamodb-orderstable
 async function sendMessageToSQS(message, queueURL) {
 
   const params = {
@@ -148,29 +152,4 @@ async function saveItemToDynamoDB(item) {
     console.error("Error saving item:", error);
     throw error;
   }
-}
-
-async function updateStatusInOrder(orderId, status) {
-
-  const params = {
-    TableName: process.env.ORDERS_TABLE,
-    Key:{orderId},
-    UpdateExpression: "SET order_status = :c",
-    ExpressionAttributeValues: {
-        ":c": status
-    },
-    ReturnValues: "ALL_NEW"
-};
-
-console.log(params);
-
-try {
-  const command = new UpdateCommand(params);
-  const response = await docClient.send(command);
-  console.log("Item updated successfully:", response.Attributes);
-  return response.Attributes;
-} catch (err) {
-  console.error("Error updating item:", err);
-  throw err;
-}
 }
