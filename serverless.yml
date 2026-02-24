@@ -51,3 +51,7 @@ resources: # Cloudformation template syntax
       Type: AWS::SQS::Queue
       Properties:
         QueueName: pendingOrderQueue
+    OrdersToSendQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ordersToSendQueue
