@@ -25,3 +25,12 @@ functions:
       - httpApi:
           path: /order/{orderId}
           method: get
+
+
+
+resources: # Cloudformation template syntax
+  Resources:
+    PendingOrderQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: pendingOrderQueue
