@@ -1,4 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
+const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+const sqsClient = new SQSClient({ region: process.env.REGION });
+
 
 exports.newOrder = async (event) => {
 
@@ -19,6 +22,9 @@ exports.newOrder = async (event) => {
   console.log(orderDetails)
 
   const order = {orderId, ...orderDetails}
+
+  await sendMessageToSQS(order);
+
 
    return {
     statusCode: 200,
@@ -52,3 +58,24 @@ exports.prepOrder = async (event) => {
 
   return;
 };
+
+
+async function sendMessageToSQS(message) {
+
+  const params = {
+    QueueUrl: process.env.PENDING_ORDER_QUEUE,
+    MessageBody: JSON.stringify(message)
+  };
+
+  console.log(params);
+
+  try {
+    const command = new SendMessageCommand(params);
+    const data = await sqsClient.send(command);
+    console.log("Message sent successfully:", data.MessageId);
+    return data;
+  } catch (error) {
+    console.error("Error sending message:", error);
+    throw error;
+  }
+}

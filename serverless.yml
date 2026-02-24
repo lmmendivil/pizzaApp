@@ -11,10 +11,21 @@ provider:
   region: us-east-1
   environment:
     REGION: ${self:provider.region}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource:
+            Fn::GetAtt: [PendingOrderQueue, Arn]
 
 functions:
   newOrder:
     handler: handler.newOrder 
+    environment:
+      PENDING_ORDER_QUEUE: 
+        Ref: PendingOrderQueue
     events:
       - httpApi:
           path: /order
