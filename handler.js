@@ -173,3 +173,34 @@ async function saveItemToDynamoDB(item) {
      }
  
  }
+
+async function getItemFromDynamoDB(orderId) {
+
+  const params = {
+    TableName: process.env.ORDERS_TABLE,
+    Key:{orderId},
+  };
+
+  console.log(params);
+
+  try {
+    const command = new GetCommand(params);
+    const response = await docClient.send(command);
+    
+    if (response.Item) {
+      console.log("Item retrieved successfully:", response.Item);
+      return response.Item;
+    } else {
+      console.log("Item not found");
+      
+      let notFoundError = new Error("Item not found");
+      notFoundError.name = "ItemNotFoundException";
+      throw notFoundError;
+    }
+
+  } catch (error) {
+    console.error("Error retrieving item:", error);
+    throw error;
+  }
+
+}
