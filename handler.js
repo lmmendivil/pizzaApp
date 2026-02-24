@@ -18,7 +18,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 exports.newOrder = async (event) => {
     
    const orderId = uuidv4();
-   console.log(orderId);
+   console.log("Generated orderId:", orderId);
 
    let orderDetails;
    try {
@@ -31,16 +31,34 @@ exports.newOrder = async (event) => {
     };    
    }
    
-   console.log(orderDetails)
+   console.log("Order details:", orderDetails)
 
    const order = {orderId, ...orderDetails}
 
-   await saveItemtoDynamoDB(order)
+   try {
+       await saveItemtoDynamoDB(order)
+       console.log("DynamoDB save successful");
+   } catch (error) {
+       console.error("DynamoDB save failed:", error);
+       return {
+           statusCode: 500,
+           body: JSON.stringify({message: "Failed to save order", error: error.message}),
+       };
+   }
 
    const PENDING_ORDERS_QUEUE_URL = process.env.PENDING_ORDER_QUEUE_URL
+   console.log("Queue URL:", PENDING_ORDERS_QUEUE_URL);
 
-   await sendMessageToSqs(order, PENDING_ORDERS_QUEUE_URL)
-
+   try {
+       await sendMessageToSqs(order, PENDING_ORDERS_QUEUE_URL)
+       console.log("SQS send successful");
+   } catch (error) {
+       console.error("SQS send failed:", error);
+       return {
+           statusCode: 500,
+           body: JSON.stringify({message: "Failed to send to queue", error: error.message}),
+       };
+   }
 
    return {
     statusCode: 200,
@@ -77,10 +95,10 @@ exports.prepOrder = async(event) => {
     const body = JSON.parse(event.Records[0].body);
     const orderId = body.orderId;
 
-    await updateStatusinOrder(orderId, "Preparing");
+    await updateStatusinOrder(orderId, "PREPARING"); 
 
     return;
-}
+};
 
 exports.sendOrder = async(event) => {
     console.log(event);
@@ -144,7 +162,7 @@ async function updateStatusinOrder(orderId, status) {
     const params = {
       TableName: process.env.ORDERS_TABLE,
       Key: { orderId },
-      UpdateExpression: "SET order_status = :c",
+      UpdateExpression: "set order_status = :c",
       ExpressionAttributeValues: {
         ":c": status
       },

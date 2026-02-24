@@ -63,7 +63,7 @@ functions:
     handler: handler.sendOrder
     environment:
       ORDERS_TO_SEND_QUEUE:
-        Ref: OrdersToSendQueue       
+        Ref: OrdersToSendQueue      
   
   
 resources: 
