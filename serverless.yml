@@ -19,3 +19,9 @@ functions:
       - httpApi:
           path: /order
           method: post
+  getOrder:
+    handler: handler.getOrder  
+    events:
+      - httpApi:
+          path: /order/{orderId}
+          method: get
