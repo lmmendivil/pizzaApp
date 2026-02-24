@@ -1,184 +1,27 @@
 const { v4: uuidv4 } = require('uuid');
-const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
-
-//sqs client
-const sqsClient = new SQSClient({ region: process.env.REGION });
-
-
-const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand, UpdateCommand } = require ("@aws-sdk/lib-dynamodb");
-
-// Create a DynamoDB client
-const client = new DynamoDBClient({ region: process.env.REGION }); 
-
-// Create a DynamoDB document client
-const docClient = DynamoDBDocumentClient.from(client);
-
 
 exports.newOrder = async (event) => {
-    
-   const orderId = uuidv4();
-   console.log("Generated orderId:", orderId);
 
-   let orderDetails;
-   try {
-    orderDetails = JSON.parse(event.body)    
-   } catch (error) {
+  const orderId = uuidv4();
+  console.log(orderId);
+
+  let orderDetails;
+  try {
+    orderDetails = JSON.parse(event.body); 
+  } catch (error) {
     console.error("Error parsing order details:", error);
     return {
-        statusCode: 400,
-        body: JSON.stringify({message: "Invalid JSON format in order details"}),
-    };    
-   }
-   
-   console.log("Order details:", orderDetails)
+      statusCode: 400,
+      body: JSON.stringify({ message: "Invalid JSON format in order details" }),
+    };
+  }
 
-   const order = {orderId, ...orderDetails}
+  console.log(orderDetails)
 
-   try {
-       await saveItemtoDynamoDB(order)
-       console.log("DynamoDB save successful");
-   } catch (error) {
-       console.error("DynamoDB save failed:", error);
-       return {
-           statusCode: 500,
-           body: JSON.stringify({message: "Failed to save order", error: error.message}),
-       };
-   }
-
-   const PENDING_ORDERS_QUEUE_URL = process.env.PENDING_ORDER_QUEUE_URL
-   console.log("Queue URL:", PENDING_ORDERS_QUEUE_URL);
-
-   try {
-       await sendMessageToSqs(order, PENDING_ORDERS_QUEUE_URL)
-       console.log("SQS send successful");
-   } catch (error) {
-       console.error("SQS send failed:", error);
-       return {
-           statusCode: 500,
-           body: JSON.stringify({message: "Failed to send to queue", error: error.message}),
-       };
-   }
+  const order = {orderId, ...orderDetails}
 
    return {
     statusCode: 200,
-    body: JSON.stringify({
-        message: order
-    }),
-};
-}   
-
-exports.getOrder = async (event) => {
-    console.log(event);
-
-    const orderId = event.pathParameters.orderId
-
-    const orderDetails = {
-        "pizza": "Margarita",
-        "customerId": 1,
-        "order_status": "COMPLETED"
-    };
-
-    const order = {orderId,...orderDetails}
-
-    console.log(order);
-    
-    return {
-        statusCode: 200,
-        body: JSON.stringify({message: order})
-    };
-}
-
-exports.prepOrder = async(event) => {
-    console.log(event);
-    
-    const body = JSON.parse(event.Records[0].body);
-    const orderId = body.orderId;
-
-    await updateStatusinOrder(orderId, "PREPARING"); 
-
-    return;
-};
-
-exports.sendOrder = async(event) => {
-    console.log(event);
-
-    const order = {
-        orderId: event.orderId,
-        pizza: event.pizza,
-        customerId: event.customerId
-    }
-
-    const ORDERS_TO_SEND_QUEUE = process.env.ORDERS_TO_SEND_QUEUE
-
-    await sendMessageToSqs(order, ORDERS_TO_SEND_QUEUE)
-
-    return; 
-    }
-
-
-
-async function sendMessageToSqs(message, queueURL) {
-    
-  const params = {
-    QueueUrl: queueURL,
-    MessageBody: JSON.stringify(message)
+    body: JSON.stringify({message: order  }),
   };
-  
-  try {
-    const command = new SendMessageCommand(params);
-    const data = await sqsClient.send(command);
-    console.log("Message sent to SQS successfully", data.MessageId);
-    return data;
-  } catch (error) {
-    console.error("Error sending message to SQS:", error)
-    throw error;    
-  }
-}
-
-async function saveItemtoDynamoDB(item){
-
-    const params = {
-        TableName: process.env.ORDERS_TABLE,
-        Item: item
-    };
-
-    console.log(params);
-
-    try {
-        const command = new PutCommand(params);
-        const response = await docClient.send(command);
-        console.log("item saved to dynamodb", response);
-        return response;
-    } catch (error) {
-        console.error("Error saving item to dynamodb", error);
-        throw error;        
-    }
-
- }
-
-async function updateStatusinOrder(orderId, status) {
-
-    const params = {
-      TableName: process.env.ORDERS_TABLE,
-      Key: { orderId },
-      UpdateExpression: "set order_status = :c",
-      ExpressionAttributeValues: {
-        ":c": status
-      },
-      ReturnValues: "ALL_NEW"  
-    };
-
-console.log(params)
-
-    try {
-        const command = new UpdateCommand(params);
-        const response = await docClient.send(command);
-        console.log("item updated in dynamodb", response);
-        return response.Attributes; 
-    } catch (err) {
-        console.error("Error updating item in dynamodb", err);
-        throw err;
-    }
-
 }
