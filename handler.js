@@ -1,7 +1,18 @@
 const { v4: uuidv4 } = require('uuid');
-const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+
+const { SQSClient, SendMessageCommand } = require ("@aws-sdk/client-sqs");
+
+// Create an SQS client
 const sqsClient = new SQSClient({ region: process.env.REGION });
 
+const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand} = require ("@aws-sdk/lib-dynamodb");
+
+// Create a DynamoDB client
+const client = new DynamoDBClient({ region: process.env.REGION }); 
+
+// Create a DynamoDB document client
+const docClient = DynamoDBDocumentClient.from(client);
 
 exports.newOrder = async (event) => {
 
@@ -23,12 +34,18 @@ exports.newOrder = async (event) => {
 
   const order = {orderId, ...orderDetails}
 
-  await sendMessageToSQS(order);
+  // Save order in the database
+  await saveItemToDynamoDB(order);
 
+    // Send message to the queue
+  const PENDING_ORDERS_QUEUE_URL = process.env.PENDING_ORDERS_QUEUE;
+  await sendMessageToSQS(order, PENDING_ORDERS_QUEUE_URL);
 
-   return {
+  return {
     statusCode: 200,
-    body: JSON.stringify({message: order  }),
+    body: JSON.stringify({
+      message: order  
+    }),
   };
 }
 
@@ -37,24 +54,37 @@ exports.getOrder = async (event) => {
 
   const orderId = event.pathParameters.orderId
 
-   const orderDetails = {
-    "pizza": "Margarita",
-    "customerId": 1,
-    "order_status": "COMPLETED"
+  try {
+    const order = await getItemFromDynamoDB(orderId);
+    console.log(order)
+    return {
+      statusCode: 200,
+      body: JSON.stringify(order)
+    };
+   } catch (error) {
+    console.error("Error retrieving order:", error);
+
+    if (error.name === "ItemNotFoundException") {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Order not found" }),
+      };
+    } else {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ message: "Error retrieving order" }),
+      };
+    }
   }
-
-  const order = {orderId, ...orderDetails}
-
-  console.log(order);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({message: order})
-  };
 }
 
 exports.prepOrder = async (event) => {
   console.log(event);
+
+  const body = JSON.parse(event.Records[0].body);
+  const orderId = body.orderId;
+
+  await updateStatusInOrder(orderId, "COMPLETED");
 
   return;
 };
@@ -65,7 +95,7 @@ exports.sendOrder = async (event) => {
   const order = {
     orderId: event.orderId,
     pizza: event.pizza,
-    customerId: event.customerId
+    customerId: event.pizza
   }
 
   const ORDERS_TO_SEND_QUEUE_URL = process.env.ORDERS_TO_SEND_QUEUE
@@ -75,26 +105,6 @@ exports.sendOrder = async (event) => {
   return;
 }
 
-
-async function sendMessageToSQS(message) {
-
-  const params = {
-    QueueUrl: process.env.PENDING_ORDER_QUEUE,
-    MessageBody: JSON.stringify(message)
-  };
-
-  console.log(params);
-
-  try {
-    const command = new SendMessageCommand(params);
-    const data = await sqsClient.send(command);
-    console.log("Message sent successfully:", data.MessageId);
-    return data;
-  } catch (error) {
-    console.error("Error sending message:", error);
-    throw error;
-  }
-}
 
 async function sendMessageToSQS(message, queueURL) {
 
@@ -112,6 +122,26 @@ async function sendMessageToSQS(message, queueURL) {
     return data;
   } catch (error) {
     console.error("Error sending message:", error);
+    throw error;
+  }
+}
+
+async function saveItemToDynamoDB(item) {
+
+  const params = {
+    TableName: process.env.ORDERS_TABLE,
+    Item: item
+  };
+
+  console.log(params);
+
+  try {
+    const command = new PutCommand(params);
+    const response = await docClient.send(command);
+    console.log("Item saved successfully:", response);
+    return response;
+  } catch (error) {
+    console.error("Error saving item:", error);
     throw error;
   }
 }
