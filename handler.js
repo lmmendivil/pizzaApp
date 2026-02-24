@@ -34,7 +34,9 @@ exports.newOrder = async (event) => {
 
   const order = {orderId, ...orderDetails}
 
-  await sendMessageToSQS(order);
+  const ORDERS_TO_SEND_QUEUE_URL = process.env.PENDING_ORDER_QUEUE
+
+  await sendMessageToSQS(order, ORDERS_TO_SEND_QUEUE_URL);
 
 
    return {
@@ -87,25 +89,7 @@ exports.sendOrder = async (event) => {
 }
 
 
-async function sendMessageToSQS(message) {
 
-  const params = {
-    QueueUrl: process.env.PENDING_ORDER_QUEUE,
-    MessageBody: JSON.stringify(message)
-  };
-
-  console.log(params);
-
-  try {
-    const command = new SendMessageCommand(params);
-    const data = await sqsClient.send(command);
-    console.log("Message sent successfully:", data.MessageId);
-    return data;
-  } catch (error) {
-    console.error("Error sending message:", error);
-    throw error;
-  }
-}
 
 async function sendMessageToSQS(message, queueURL) {
 
