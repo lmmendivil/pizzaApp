@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+<<<<<<< HEAD
 
 const { SQSClient, SendMessageCommand } = require ("@aws-sdk/client-sqs");
 
@@ -7,6 +8,16 @@ const sqsClient = new SQSClient({ region: process.env.REGION });
 
 const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand, UpdateCommand} = require ("@aws-sdk/lib-dynamodb");
+=======
+const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
+
+//SQS Client
+const sqsClient = new SQSClient({ region: process.env.REGION });
+
+//DynamoDB
+const { DynamoDBClient } = require ("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, PutCommand, UpdateCommand, GetCommand } = require ("@aws-sdk/lib-dynamodb");
+>>>>>>> dynamodb-orderstable
 
 // Create a DynamoDB client
 const client = new DynamoDBClient({ region: process.env.REGION }); 
@@ -34,8 +45,14 @@ exports.newOrder = async (event) => {
 
   const order = {orderId, ...orderDetails}
 
+<<<<<<< HEAD
   // Save order in the database
   await saveItemToDynamoDB(order);
+=======
+  const ORDERS_TO_SEND_QUEUE_URL = process.env.PENDING_ORDER_QUEUE
+
+  await sendMessageToSQS(order, ORDERS_TO_SEND_QUEUE_URL);
+>>>>>>> dynamodb-orderstable
 
     // Send message to the queue
   const PENDING_ORDERS_QUEUE_URL = process.env.PENDING_ORDERS_QUEUE;
@@ -106,6 +123,11 @@ exports.sendOrder = async (event) => {
 }
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> dynamodb-orderstable
 async function sendMessageToSQS(message, queueURL) {
 
   const params = {
