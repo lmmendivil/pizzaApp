@@ -107,8 +107,6 @@ exports.sendOrder = async (event) => {
 }
 
 
-<<<<<<< HEAD
-=======
 
 
 >>>>>>> dynamodb-orderstable
