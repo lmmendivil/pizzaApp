@@ -29,14 +29,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:GetItem
-          Resource:
-=======
-          Action: 
-            - dynamodb:PutItem
-            - dynamodb:GetItem
-            - dynamodb:UpdateItem
           Resource: 
->>>>>>> dynamodb-orderstable
             Fn::GetAtt: [OrdersTable, Arn]
 
 functions:
