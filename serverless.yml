@@ -24,7 +24,6 @@ provider:
           Resource:
             Fn::GetAtt: [OrdersToSendQueue, Arn]
         - Effect: Allow
-<<<<<<< HEAD
           Action:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
